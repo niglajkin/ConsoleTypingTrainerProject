@@ -18,14 +18,15 @@ public class TypingTrainerApp(
                 continue;
             }
 
-            var userModeNumberChoice = int.Parse(userModeChoice);
-            var trainingMode = allTrainingModes.Find(mode => mode.Number == userModeNumberChoice)!;
-            var chosenExerciseNumber = userInterface.GetUserInput(
+            var chosenModeNumber = int.Parse(userModeChoice);
+            var trainingMode = allTrainingModes.Find(mode => mode.Number == chosenModeNumber)!;
+            
+            var chosenExercise = userInterface.GetUserInput(
                 trainingMode.GettingInputMassage,
                 trainingMode.CorrectInputCondition
             );
 
-            var exercise = trainingMode.GetExercise(chosenExerciseNumber);
+            var exercise = trainingMode.GetExercise(chosenExercise);
 
             var exitWasChosen = exercise == null;
             if (!exitWasChosen) {

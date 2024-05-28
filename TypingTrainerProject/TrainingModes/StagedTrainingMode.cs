@@ -3,14 +3,15 @@ using TypingTrainerProject.DataClasses;
 
 namespace TypingTrainerProject.TrainingModes;
 
-public class StagedTrainingMode : ITrainingMode {
-    public string Name => "Staged training mode";
-    public string Description => "Learn to type by step by step exercises";
+public class StagedTrainingMode : TrainingMode {
+    public override string Name => "Staged training mode";
+    public override string Description => "Learn to type by step by step exercises";
 
+    public override int Number => 1;
 
-    public string[] GettingInputMassage => [GettingRowMassage, GettingExerciseMassage];
+    public override string[] GettingInputMassage => [GettingRowMassage, GettingExerciseMassage];
 
-    public Predicate<string>[] CorrectInputCondition => [ExistingRowChosen, ExistingExerciseChosen];
+    public override Predicate<string>[] CorrectInputCondition => [ExistingRowChosen, ExistingExerciseChosen];
 
 
     private string GettingRowMassage {
@@ -21,14 +22,13 @@ public class StagedTrainingMode : ITrainingMode {
             var massage = $"Choose row:{Environment.NewLine}";
 
             var rowNumber = 1;
-            foreach (var row in SymbolsRows) {
+            foreach (var row in SymbolsDividedInRows) {
                 var firstRowElement = row[firstElementIndex];
                 var lastRowElement = row[lastElementIndex];
                 massage += $"{rowNumber})Row [{firstRowElement} - {lastRowElement}]{Environment.NewLine}";
                 rowNumber++;
             }
-
-            massage += $"{rowNumber})All symbols.{Environment.NewLine}";
+            
             massage += "Print [exit] to get back to choosing mode.";
 
             return massage;
@@ -54,7 +54,7 @@ public class StagedTrainingMode : ITrainingMode {
 
     private Predicate<string> ExistingRowChosen => input => {
         const int firstRowNumber = 1;
-        const int lastRowNumber = 6;
+        const int lastRowNumber = 5;
         var inputIsNumber = int.TryParse(input, out var rowNumber);
         var rowExist = rowNumber is >= firstRowNumber and <= lastRowNumber;
         var inputIsExit = input == "exit";
@@ -72,12 +72,13 @@ public class StagedTrainingMode : ITrainingMode {
         return inputIsExit || (inputIsNumber && exerciseExist);
     };
 
-    public Exercise? GetExercise(string exerciseNumber) {
-        var userInput = exerciseNumber.Split(' ');
+    public override Exercise? GetExercise(string userChoice) {
+        var userInput = userChoice.Split(' ');
+        
+        if (userInput.Any(s => s == "exit")) return null;
+        
         var firstInputPart = userInput[0];
         var secondInputPart = userInput[1];
-
-        if (userInput.Any(s => s == "exit")) return null;
 
         var rowNumber = int.Parse(firstInputPart);
         var exerciseIndex = int.Parse(secondInputPart) - 1;
@@ -94,23 +95,32 @@ public class StagedTrainingMode : ITrainingMode {
     }
 
 
-    private List<List<string>> SymbolsRows => [
-        ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"],
+    private List<List<string>> SymbolsDividedInRows {
+        get {
+            var symbolsInRows = new List<List<string>>();
+            var interimRow = new List<string>();
 
-        ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+            const int rowLength = 10;
+            foreach (var symbol in AllSymbols) {
+                interimRow.Add(symbol);
+                
+                if (interimRow.Count == rowLength) {
+                    symbolsInRows.Add([..interimRow]);
+                    interimRow.Clear();
+                }
+                
+            }
 
-        ["z", "x", "c", "v", "b", "n", "m", ",", ".", "/"],
+            return symbolsInRows;
+        }
+    }
 
-        ["!", "?", "-", "@", "[", "]", "(", ")", ":", "="],
-
-        ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
-    ];
     private List<RowExercisesMaterials> AllExerciseMaterials {
         get {
             var allExercisesMaterials = new List<RowExercisesMaterials>();
 
             var rowNumber = 1;
-            foreach (var row in SymbolsRows) {
+            foreach (var row in SymbolsDividedInRows) {
                 const int rowLength = 10;
                 var rowExercisesSymbols = new List<string[]>();
 

@@ -4,12 +4,11 @@ using TypingTrainerProject.UserInterface;
 
 
 var userInterface = new ConsoleUserInterface();
-var allModes = new Dictionary<string, ITrainingMode> {
-    { "1", new StagedTrainingMode() },
-    { "2", new CustomTrainingMode() },
-    { "3", new RealTextTrainingMode() }
+var allModes = new List<TrainingMode> {
+    new StagedTrainingMode(),
+    new CustomTrainingMode(),
+    new RealTextTrainingMode()
 };
 
 var app = new TypingTrainerApp(allModes, userInterface);
 app.Start();
-

@@ -3,11 +3,12 @@ using TypingTrainerProject.DataClasses;
 
 namespace TypingTrainerProject.TrainingModes;
 
-public class CustomTrainingMode : ITrainingMode {
-    public string Name => "Custom training mode";
-    public string Description => "Choose symbols to practice";
+public class CustomTrainingMode : TrainingMode {
+    public override string Name => "Custom training mode";
+    public override string Description => "Choose symbols to practice";
+    public override int Number => 2;
 
-    public string[] GettingInputMassage {
+    public override string[] GettingInputMassage {
         get {
             var massage = $"Write all needed symbols in a row:{Environment.NewLine}";
 
@@ -30,7 +31,7 @@ public class CustomTrainingMode : ITrainingMode {
         }
     }
 
-    public Predicate<string>[] CorrectInputCondition => [
+    public override Predicate<string>[] CorrectInputCondition => [
         input => {
             var selectedChars = input.Split(" ");
 
@@ -41,22 +42,13 @@ public class CustomTrainingMode : ITrainingMode {
         }
     ];
 
-    public Exercise? GetExercise(string exerciseNumber) {
+    public override Exercise? GetExercise(string userChoice) {
 
-        if (exerciseNumber is "exit") return null;
+        if (userChoice is "exit") return null;
         
-        var selectedSymbols = exerciseNumber.Split(" ");
+        var selectedSymbols = userChoice.Split(" ");
         var exercise = ExerciseGenerator.Generate(selectedSymbols);
 
         return exercise;
     }
-
-    private List<string> AllSymbols => [
-        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
-        "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-
-        "!", "?", ":", "@", ";", "(", ")", "*", "."
-    ];
 }

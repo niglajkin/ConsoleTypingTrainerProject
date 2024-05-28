@@ -2,11 +2,13 @@ using TypingTrainerProject.DataClasses;
 
 namespace TypingTrainerProject.TrainingModes;
 
-public class RealTextTrainingMode : ITrainingMode {
-    public string Name => "Real text training mode";
-    public string Description => "Type a large real text";
+public class RealTextTrainingMode : TrainingMode {
+    public override string Name => "Real text training mode";
+    public override string Description => "Type a large real text";
+    
+    public override int Number => 3;
 
-    public string[] GettingInputMassage {
+    public override string[] GettingInputMassage {
         get {
             var massage = $"Choose text to type:{Environment.NewLine}";
 
@@ -20,7 +22,7 @@ public class RealTextTrainingMode : ITrainingMode {
         }
     }
 
-    public Predicate<string>[] CorrectInputCondition => [
+    public override Predicate<string>[] CorrectInputCondition => [
         input => {
             var inputIsNumber = int.TryParse(input, out var inputAsNumber);
             var inputIsTextNumber = AllBuiltInTexts.Any(text => text.Number == inputAsNumber);
@@ -30,11 +32,10 @@ public class RealTextTrainingMode : ITrainingMode {
         }
     ];
 
+    public override Exercise? GetExercise(string userChoice) {
+        if (userChoice == "exit") return null;
 
-    public Exercise? GetExercise(string exerciseIdentifier) {
-        if (exerciseIdentifier == "exit") return null;
-
-        var textIndex = int.Parse(exerciseIdentifier) - 1;
+        var textIndex = int.Parse(userChoice) - 1;
         var text = AllBuiltInTexts[textIndex];
         var exercise = new Exercise(text.Words);
 

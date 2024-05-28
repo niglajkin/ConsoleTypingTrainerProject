@@ -4,7 +4,7 @@ using TypingTrainerProject.UserInterface;
 namespace TypingTrainerProject.App;
 
 public class TypingTrainerApp(
-    Dictionary<string, ITrainingMode> allTrainingModes,
+    List<TrainingMode> allTrainingModes,
     IUserInterface userInterface
 ) {
     public void Start() {
@@ -18,7 +18,8 @@ public class TypingTrainerApp(
                 continue;
             }
 
-            var trainingMode = allTrainingModes[userModeChoice];
+            var userModeNumberChoice = int.Parse(userModeChoice);
+            var trainingMode = allTrainingModes.Find(mode => mode.Number == userModeNumberChoice)!;
             var chosenExerciseNumber = userInterface.GetUserInput(
                 trainingMode.GettingInputMassage,
                 trainingMode.CorrectInputCondition
@@ -37,8 +38,8 @@ public class TypingTrainerApp(
         get {
             var massage = $"Choose typing training type:{Environment.NewLine}";
 
-            foreach (var (modeNumber, mode) in allTrainingModes) {
-                massage += $"{modeNumber}){mode.Name}. {mode.Description}.{Environment.NewLine}";
+            foreach (var mode in allTrainingModes) {
+                massage += $"{mode.Number}){mode.Name}. {mode.Description}.{Environment.NewLine}";
             }
 
             massage += "Print [exit] to stop the application.";
@@ -47,6 +48,13 @@ public class TypingTrainerApp(
         }
     }
 
-    private Predicate<string>[] CorrectModeChosenCondition =>
-        [str => str == "exit" || allTrainingModes.ContainsKey(str)];
+    private Predicate<string>[] CorrectModeChosenCondition => [
+        input => {
+            var inputIsExit = input == "exit";
+            var inputIsNumber = int.TryParse(input, out var inputAsNumber);
+            var inputIsModeNumber = allTrainingModes.Any(mode => mode.Number == inputAsNumber);
+
+            return inputIsExit || (inputIsNumber && inputIsModeNumber);
+        }
+    ];
 }
